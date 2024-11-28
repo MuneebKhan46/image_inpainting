@@ -169,9 +169,8 @@ optimizer_D = optim.Adam(discriminator.parameters(), lr=0.0002, betas=(0.5, 0.99
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-yuv_dir = '/Artifact Removal/Dataset/dataset_full' 
-diff_map_dir = '/Artifact Removal/Dataset/detection_map_full'
-
+yuv_dir = '/home/msh7377/Dataset/dataset_full' 
+diff_map_dir = '/home/msh7377/Dataset/detection_map_full'
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
