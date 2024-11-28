@@ -10,7 +10,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from skimage.metrics import peak_signal_noise_ratio as compare_psnr
 from skimage.metrics import structural_similarity as compare_ssim
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 class YUVImageDataset(Dataset):
     def __init__(self, yuv_dir, diff_map_dir, image_size=(720, 1280), mask_threshold=0.1, mode='train', triplets_list=None):
@@ -90,7 +90,7 @@ class YUVImageDataset(Dataset):
         return masked_y_tensor, y_tensor, mask_tensor, y_channel
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 class Generator(nn.Module):
     def __init__(self):
@@ -121,7 +121,7 @@ class Generator(nn.Module):
         output = self.decoder(enc)
         return output
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 class Discriminator(nn.Module):
     def __init__(self):
@@ -142,7 +142,7 @@ class Discriminator(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 def adversarial_loss(pred, target):
     return nn.BCELoss()(pred, target)
@@ -150,7 +150,7 @@ def adversarial_loss(pred, target):
 def reconstruction_loss(pred, target):
     return nn.L1Loss()(pred, target)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -167,16 +167,16 @@ optimizer_G = optim.Adam(generator.parameters(), lr=0.0002, betas=(0.5, 0.999))
 optimizer_D = optim.Adam(discriminator.parameters(), lr=0.0002, betas=(0.5, 0.999))
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 yuv_dir = '/home/msh7377/Dataset/dataset_full' 
 diff_map_dir = '/home/msh7377/Dataset/detection_map_full'
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 full_dataset = YUVImageDataset(yuv_dir, diff_map_dir, image_size=(720, 1280), mask_threshold=0.1)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 dataset_size = len(full_dataset)
 indices = list(range(dataset_size))
@@ -185,25 +185,25 @@ np.random.shuffle(indices)
 train_indices, test_indices = indices[split:], indices[:split]
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 train_triplets = [full_dataset.image_triplets[i] for i in train_indices]
 test_triplets = [full_dataset.image_triplets[i] for i in test_indices]
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 train_dataset = YUVImageDataset(yuv_dir, diff_map_dir, image_size=(720, 1280), mask_threshold=0.1, mode='train', triplets_list=train_triplets)
 
 test_dataset = YUVImageDataset( yuv_dir, diff_map_dir, image_size=(720, 1280), mask_threshold=0.1, mode='test', triplets_list=test_triplets)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=128, shuffle=False)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 def train_gan(dataloader, num_epochs=100, model_save_dir="/home/msh7377/Muneeb/Models"):
@@ -244,7 +244,7 @@ def train_gan(dataloader, num_epochs=100, model_save_dir="/home/msh7377/Muneeb/M
     print("Training completed. Final models saved.")
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 def test_model(generator, test_loader, output_dir="/home/msh7377/Muneeb/Output"):
@@ -294,10 +294,10 @@ def test_model(generator, test_loader, output_dir="/home/msh7377/Muneeb/Output")
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 train_gan(train_loader, num_epochs=100, model_save_dir="/home/msh7377/Muneeb/Models")
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 test_model(generator, test_loader, output_dir="/home/msh7377/Muneeb/Output")
