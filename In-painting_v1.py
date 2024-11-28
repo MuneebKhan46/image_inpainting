@@ -199,8 +199,8 @@ test_dataset = YUVImageDataset( yuv_dir, diff_map_dir, image_size=(720, 1280), m
 
 
 
-train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=128, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 
 
