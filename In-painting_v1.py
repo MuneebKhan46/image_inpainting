@@ -155,13 +155,12 @@ def reconstruction_loss(pred, target):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 generator = Generator().to(device)
-# generator = nn.DataParallel(generator) 
-generator = torch.nn.parallel.DistributedDataParallel(generator) 
+generator = nn.DataParallel(generator) 
 
 
 discriminator = Discriminator().to(device)
-# discriminator = nn.DataParallel(discriminator)
-discriminator =  torch.nn.parallel.DistributedDataParallel(discriminator)
+discriminator = nn.DataParallel(discriminator)
+
 
 optimizer_G = optim.Adam(generator.parameters(), lr=0.0002, betas=(0.5, 0.999))
 optimizer_D = optim.Adam(discriminator.parameters(), lr=0.0002, betas=(0.5, 0.999))
