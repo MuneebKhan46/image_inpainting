@@ -213,8 +213,8 @@ train_size = int(0.9 * len(dataset))
 test_size = len(dataset) - train_size
 train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
-train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)  # Reduced batch size due to increased data size
-test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+train_loader = DataLoader(train_dataset,  shuffle=True)
+test_loader = DataLoader(test_dataset, shuffle=False)
 
 train_gan(train_loader, num_epochs=10)
 
