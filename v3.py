@@ -36,19 +36,24 @@ class YUVImageDataset(Dataset):
         uv_width = width // 2
         uv_height = height // 2
         uv_size = uv_width * uv_height
-
+    
         frame_size = int(y_size + 2 * uv_size)
-
+    
         with open(yuv_path, 'rb') as f:
             yuv_bytes = f.read(frame_size)
             y = np.frombuffer(yuv_bytes[0:y_size], dtype=np.uint8).reshape((height, width))
             u = np.frombuffer(yuv_bytes[y_size:y_size+uv_size], dtype=np.uint8).reshape((uv_height, uv_width))
-            v = np.frombuffer(yuv_bytes[y_size+uv_size:], dtype=np.uint8).reshape((uv_height, uv_width))
-
+            v = np.frombuffer(yuv_bytes[y_size+uv_size:y_size+2*uv_size], dtype=np.uint8).reshape((uv_height, uv_width))
+    
+            # Ensure arrays are writable
+            y = np.array(y, copy=True)
+            u = np.array(u, copy=True)
+            v = np.array(v, copy=True)
+    
             # Upsample U and V to match Y dimensions using nearest neighbor
             u = u.repeat(2, axis=0).repeat(2, axis=1)
             v = v.repeat(2, axis=0).repeat(2, axis=1)
-
+    
         return y, u, v
 
     def load_diff_map(self, diff_map_path):
@@ -202,7 +207,7 @@ def train_gan(dataloader, num_epochs=100):
 yuv_dir = '/home/msh7377/dataset_full' 
 diff_map_dir = '/home/msh7377/detection_map_full'
 
-dataset = YUVImageDataset(yuv_dir, diff_map_dir, image_size=(720, 1280), mask_threshold=0.1)
+dataset = YUVImageDataset(yuv_dir, diff_map_dir, image_size=(720, 640), mask_threshold=0.1)
 
 train_size = int(0.9 * len(dataset))
 test_size = len(dataset) - train_size
@@ -273,7 +278,7 @@ def yuv_to_rgb(y, u, v):
 
 # visualize_results(generator, test_loader, num_images=5)
 
-save_path = '/home/msh7377/Muneeb/Output'
+save_path = '/home/msh7377/Muneeb/Models'
 os.makedirs(save_path, exist_ok=True)
 torch.save(generator.state_dict(), os.path.join(save_path, 'Generator.pth'))
 torch.save(discriminator.state_dict(), os.path.join(save_path, 'Discriminator.pth'))
