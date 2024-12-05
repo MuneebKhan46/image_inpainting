@@ -210,17 +210,12 @@ def combined_loss(vgg, alpha=1.0, beta=0.1, gamma=0.01):
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# generator = Generator().to(device)
-# generator = nn.DataParallel(generator)
 
 generator = Generator().to(device)
 generator = nn.DataParallel(generator, device_ids=device_ids)
 
 
 optimizer_G = optim.Adam(generator.parameters(), lr=0.0002, betas=(0.5, 0.999))
-
-# vgg = VGGFeatures().to(device)
-# vgg = nn.DataParallel(vgg)
 
 vgg = VGGFeatures().to(device)
 vgg = nn.DataParallel(vgg, device_ids=device_ids)
@@ -247,8 +242,8 @@ train_dataset = YUVImageDataset(yuv_dir, diff_map_dir, image_size=(720, 1280), m
 
 test_dataset = YUVImageDataset(yuv_dir, diff_map_dir, image_size=(720, 1280), mask_threshold=0.1, mode='test', triplets_list=test_triplets)
 
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 
 
