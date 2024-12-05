@@ -16,7 +16,7 @@ from skimage.metrics import structural_similarity as compare_ssim
 
 
 device_ids = [0, 1]  # Use both GPUs
-device = torch.device(f"cuda:{device_ids[0]}")
+device = torch.device(f"cuda:{device_ids[0]}" if torch.cuda.is_available() else "cpu")
 
 
 class YUVImageDataset(Dataset):
@@ -265,7 +265,10 @@ def train_model(dataloader, num_epochs=1):
             if (i+1) % 10 == 0:
                 print(f"Epoch [{epoch+1}/{num_epochs}] Batch [{i+1}/{len(dataloader)}] Loss: {loss.item():.4f}")
         validate_model(generator, test_loader)
-
+    
+    model_save_path = '/home/msh7377/Muneeb/Models/trained_generator.pth'
+    torch.save(generator.state_dict(), model_save_path)
+    print(f"Model saved to {model_save_path}")
 
 
 
