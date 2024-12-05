@@ -247,7 +247,7 @@ test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
 
 
 
-def train_model(dataloader, num_epochs=1):
+def train_model(dataloader, num_epochs=100):
     for epoch in range(num_epochs):
         generator.train()
         for i, (masked_y, y_channel, mask, _) in enumerate(dataloader):
@@ -264,15 +264,9 @@ def train_model(dataloader, num_epochs=1):
 
             if (i+1) % 10 == 0:
                 print(f"Epoch [{epoch+1}/{num_epochs}] Batch [{i+1}/{len(dataloader)}] Loss: {loss.item():.4f}")
-        validate_model(generator, test_loader)
-    
-    model_save_path = '/home/msh7377/Muneeb/Models/trained_generator.pth'
-    torch.save(generator.state_dict(), model_save_path)
-    print(f"Model saved to {model_save_path}")
 
 
-
-def validate_model(generator, test_loader):
+def test_model(generator, test_loader):
     generator.eval()
     total_psnr = 0
     total_ssim = 0
@@ -293,8 +287,6 @@ def validate_model(generator, test_loader):
     avg_psnr = total_psnr / count
     avg_ssim = total_ssim / count
     print(f"Validation - Average PSNR: {avg_psnr:.4f}, Average SSIM: {avg_ssim:.4f}")
-
-
 
 
 def save_images(generator, test_loader, save_base_dir, num_images=5):
@@ -340,5 +332,11 @@ def save_images(generator, test_loader, save_base_dir, num_images=5):
 
 
 train_model(train_loader, num_epochs=1)
-
+test_model(generator, test_loader)
 save_images(generator, test_loader, save_base_dir='/home/msh7377/Muneeb/Output', num_images=5)
+
+
+model_save_path = '/home/msh7377/Muneeb/Models/trained_generator.pth'
+torch.save(generator.state_dict(), model_save_path)
+print(f"Model saved to {model_save_path}")
+
