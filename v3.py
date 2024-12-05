@@ -32,7 +32,6 @@ class YUVImageDataset(Dataset):
         print(f"Loaded {len(self.image_triplets)} image triplets for mode {self.mode}.")
 
     def _load_image_triplets(self):
-        # Previous implementation remains the same
         image_triplets = []
         for filename in os.listdir(self.yuv_dir):
             if filename.startswith('original_') and filename.endswith('.raw'):
@@ -71,7 +70,6 @@ class YUVImageDataset(Dataset):
                 mask[y:y+h, x:x+w] = 0
             return mask
         else:
-            # Load and process difference map
             diff_map = Image.open(diff_map_path).convert('L')
             diff_map = diff_map.resize((width, height))  # Note the order: width, height for PIL
             mask = np.array(diff_map) / 255.0
@@ -94,13 +92,11 @@ class YUVImageDataset(Dataset):
         else:
             raise ValueError(f"Invalid mode: {self.mode}")
 
-        # Ensure all arrays have the same shape
         assert y_channel.shape == mask.shape, f"Shape mismatch: y_channel {y_channel.shape} vs mask {mask.shape}"
         
         masked_y_channel = y_channel.copy()
         masked_y_channel[mask == 0] = 0
 
-        # Convert to tensors
         y_tensor = torch.from_numpy(ground_truth_y_channel).unsqueeze(0).float() / 255.0
         masked_y_tensor = torch.from_numpy(masked_y_channel).unsqueeze(0).float() / 255.0
         mask_tensor = torch.from_numpy(mask).unsqueeze(0).float()
@@ -162,10 +158,8 @@ class VGGFeatures(nn.Module):
 
 
 def perceptual_loss(vgg, predicted, ground_truth):
-    # Convert grayscale to 3-channel images
     predicted_rgb = predicted.repeat(1, 3, 1, 1)
     ground_truth_rgb = ground_truth.repeat(1, 3, 1, 1)
-    # Get features
     features_pred = vgg(predicted_rgb)
     features_gt = vgg(ground_truth_rgb)
     loss = 0
@@ -182,10 +176,8 @@ def gram_matrix(features):
 
 
 def style_loss(vgg, predicted, ground_truth):
-    # Convert grayscale to 3-channel images
     predicted_rgb = predicted.repeat(1, 3, 1, 1)
     ground_truth_rgb = ground_truth.repeat(1, 3, 1, 1)
-    # Get features
     features_pred = vgg(predicted_rgb)
     features_gt = vgg(ground_truth_rgb)
     loss = 0
@@ -222,6 +214,9 @@ generator = nn.DataParallel(generator)
 optimizer_G = optim.Adam(generator.parameters(), lr=0.0002, betas=(0.5, 0.999))
 
 vgg = VGGFeatures().to(device)
+vgg = nn.DataParallel(vgg)
+
+
 loss_function = combined_loss(vgg, alpha=1.0, beta=0.1, gamma=0.01)
 
 yuv_dir = '/home/msh7377/dataset_full' 
@@ -239,16 +234,12 @@ train_indices, test_indices = indices[split:], indices[:split]
 train_triplets = [full_dataset.image_triplets[i] for i in train_indices]
 test_triplets = [full_dataset.image_triplets[i] for i in test_indices]
 
-train_dataset = YUVImageDataset(yuv_dir, diff_map_dir, image_size=(720, 1280), mask_threshold=0.1, 
-                                mode='train', triplets_list=train_triplets)
+train_dataset = YUVImageDataset(yuv_dir, diff_map_dir, image_size=(720, 1280), mask_threshold=0.1, mode='train', triplets_list=train_triplets)
 
-test_dataset = YUVImageDataset(yuv_dir, diff_map_dir, image_size=(720, 1280), mask_threshold=0.1, 
-                               mode='test', triplets_list=test_triplets)
+test_dataset = YUVImageDataset(yuv_dir, diff_map_dir, image_size=(720, 1280), mask_threshold=0.1, mode='test', triplets_list=test_triplets)
 
-
-
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 
 
@@ -300,7 +291,6 @@ def validate_model(generator, test_loader):
 
 
 def save_images(generator, test_loader, save_base_dir, num_images=5):
-    # Create subdirectories if they don't exist
     gt_dir = os.path.join(save_base_dir, "GT")
     generated_dir = os.path.join(save_base_dir, "Generated")
     mask_dir = os.path.join(save_base_dir, "Mask")
@@ -323,19 +313,15 @@ def save_images(generator, test_loader, save_base_dir, num_images=5):
             mask = mask.cpu().squeeze(1).numpy()
 
             for j in range(len(generated)):
-                # Save Masked Input Image
                 masked_input_path = os.path.join(masked_dir, f"masked_input_{i}_{j}.png")
                 cv2.imwrite(masked_input_path, (masked_y[j] * 255).astype(np.uint8))
 
-                # Save Ground Truth Image
                 ground_truth_path = os.path.join(gt_dir, f"ground_truth_{i}_{j}.png")
                 cv2.imwrite(ground_truth_path, (y_channel[j] * 255).astype(np.uint8))
 
-                # Save Generated Image
                 generated_path = os.path.join(generated_dir, f"generated_{i}_{j}.png")
                 cv2.imwrite(generated_path, (generated[j] * 255).astype(np.uint8))
 
-                # Save Mask
                 mask_path = os.path.join(mask_dir, f"mask_{i}_{j}.png")
                 cv2.imwrite(mask_path, (mask[j] * 255).astype(np.uint8))
 
