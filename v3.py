@@ -15,6 +15,8 @@ from skimage.metrics import peak_signal_noise_ratio as compare_psnr
 from skimage.metrics import structural_similarity as compare_ssim
 
 
+device_ids = [0, 1]  # Use both GPUs
+device = torch.device(f"cuda:{device_ids[0]}")
 
 
 class YUVImageDataset(Dataset):
@@ -208,13 +210,20 @@ def combined_loss(vgg, alpha=1.0, beta=0.1, gamma=0.01):
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# generator = Generator().to(device)
+# generator = nn.DataParallel(generator)
+
 generator = Generator().to(device)
-generator = nn.DataParallel(generator)
+generator = nn.DataParallel(generator, device_ids=device_ids)
+
 
 optimizer_G = optim.Adam(generator.parameters(), lr=0.0002, betas=(0.5, 0.999))
 
+# vgg = VGGFeatures().to(device)
+# vgg = nn.DataParallel(vgg)
+
 vgg = VGGFeatures().to(device)
-vgg = nn.DataParallel(vgg)
+vgg = nn.DataParallel(vgg, device_ids=device_ids)
 
 
 loss_function = combined_loss(vgg, alpha=1.0, beta=0.1, gamma=0.01)
