@@ -242,8 +242,8 @@ train_dataset = YUVImageDataset(yuv_dir, diff_map_dir, image_size=(720, 1280), m
 
 test_dataset = YUVImageDataset(yuv_dir, diff_map_dir, image_size=(720, 1280), mask_threshold=0.1, mode='test', triplets_list=test_triplets)
 
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
 
 
 
